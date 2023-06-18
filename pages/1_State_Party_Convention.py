@@ -22,7 +22,6 @@ def visualize_plotly(G):
         hoverinfo='none',
         mode='lines')
 
-
     pos = nx.kamada_kawai_layout(G) 
     for n, p in pos.items():
         G.nodes[n]['pos'] = p
@@ -41,15 +40,7 @@ def visualize_plotly(G):
         mode='markers',
         hoverinfo='text',
         marker=dict(
-            showscale=True,
-            color=[],
             size=20,
-            colorbar=dict(
-                thickness=10,
-                title='# Connections',
-                xanchor='left',
-                titleside='right'
-            ),
             line=dict(width=0)))
 
     for node in G.nodes():
