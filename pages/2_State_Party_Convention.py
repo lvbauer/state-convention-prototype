@@ -153,5 +153,7 @@ def main():
         with col3:
             st.metric("Illegitimate Votes", vote_status_dict["bad"])
 
+        visualize_plotly(graph_dict[extra_details_race])
+
 main()
 
