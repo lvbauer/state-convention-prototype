@@ -144,7 +144,7 @@ def main():
     with col4:
         st.metric("Illegitimate Votes", num_bad_votes)
 
-    successful_candidates = [party_candidate_list_name[node-1] for (node, val) in G.degree() if (val > num_sig_req)]
+    successful_candidates = [party_candidate_list_name[node-1] for (node, val) in G.degree() if (val >= num_sig_req)]
 
     st.write("Candidates with Sufficient Votes")
     successful_candidates
