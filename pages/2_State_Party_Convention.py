@@ -73,12 +73,19 @@ def clean_sig_csv(raw_sig_df):
 def get_good_candidates(G, num_sig_req):
     return [node for node, val in G.in_degree() if (val >= num_sig_req)]
 
+def get_good_candidates_val(G, num_sig_req):
+    return [[node, val] for node, val in G.in_degree() if (val >= num_sig_req)]
+
 def get_almost_candidates(G, num_sig_req):
     return [node for node, val in G.in_degree() if (val > 0) and (val < num_sig_req)]
 
+def get_almost_candidates_val(G, num_sig_req):
+    return [[node, val] for node, val in G.in_degree() if (val > 0) and (val < num_sig_req)]
 
 def main():
     
+    with st.sidebar:
+        show_network_graph = st.checkbox("Show Network Visualization", value=False)
 
     st.header("State Party Election Prototype")
 
@@ -131,6 +138,11 @@ def main():
     successful_candidates = {race : get_good_candidates(graph_dict[race], race_params[race][1]) for race in unique_races}
     still_running_candidates = {race : get_almost_candidates(graph_dict[race], race_params[race][1]) for race in unique_races}
 
+    successful_candidates_val = {race : get_good_candidates_val(graph_dict[race], race_params[race][1]) for race in unique_races}
+    still_running_candidates_Val = {race : get_almost_candidates_val(graph_dict[race], race_params[race][1]) for race in unique_races}
+
+
+
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("Successful Candidates")
@@ -139,8 +151,9 @@ def main():
         st.subheader("Still Running Candidates")
         still_running_candidates
 
-    extra_details_race = st.selectbox("Race Details", unique_races)
 
+    st.subheader("Race Details")
+    extra_details_race = st.selectbox("Race Details", unique_races)
 
     if extra_details_race is not None:
         vote_status_dict = votes_dict[extra_details_race]
@@ -153,7 +166,27 @@ def main():
         with col3:
             st.metric("Illegitimate Votes", vote_status_dict["bad"])
 
-        visualize_plotly(graph_dict[extra_details_race])
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.subheader("Successful Candidates")
+            extra_success_df = pd.DataFrame(successful_candidates_val[extra_details_race], columns=["Candidate", "Signatures"])
+            extra_success_df = extra_success_df.sort_values("Signatures", ascending=False)
+            st.dataframe(extra_success_df)
+
+        with col2:
+            st.subheader("Candidates Still Running")
+            extra_still_df = pd.DataFrame(still_running_candidates_Val[extra_details_race], columns=["Candidate", "Signatures"])
+            extra_still_df = extra_still_df.sort_values("Signatures", ascending=False)
+            st.dataframe(extra_still_df)
+
+
+        st.subheader("Network Graph Visualization")
+        if show_network_graph:
+            visualize_plotly(graph_dict[extra_details_race])
+        else:
+            st.write("Graph hidden for performance. Enable in sidebar.")
 
 main()
 
