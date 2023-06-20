@@ -59,11 +59,6 @@ def visualize_plotly(G):
 
 def clean_sig_csv(raw_sig_df):
 
-    #st.dataframe(raw_sig_df)
-
-    #df_sliced = raw_sig_df.loc[:,"Candidate for Governor":"Signee Election Code.6"]
-    #st.dataframe(df_sliced)
-
     response_list = []
     for idx, row in raw_sig_df.iterrows():
         row_list = row.tolist()
@@ -76,7 +71,11 @@ def clean_sig_csv(raw_sig_df):
     return response_df
 
 def get_good_candidates(G, num_sig_req):
-    return [node for node, val in G.degree() if (val >= num_sig_req)]
+    return [node for node, val in G.in_degree() if (val >= num_sig_req)]
+
+def get_almost_candidates(G, num_sig_req):
+    return [node for node, val in G.in_degree() if (val > 0) and (val < num_sig_req)]
+
 
 def main():
     
@@ -106,16 +105,12 @@ def main():
 
     unique_races = sig_df_clean["position"].tolist()
     unique_races = list(set(unique_races))
-    #print(unique_races)
 
     race_params = {x : (1, 30) if ("Court" not in x) else (7,30) for x in unique_races }
-    #print(race_params)
 
     graph_dict = {x : nx.DiGraph() for x in unique_races}
     for key, graph in graph_dict.items():
         graph.add_nodes_from(unique_voters)
-
-
 
     votes_dict = {x : {'good':0,'bad':0} for x in unique_races}
 
@@ -134,12 +129,17 @@ def main():
 
 
     successful_candidates = {race : get_good_candidates(graph_dict[race], race_params[race][1]) for race in unique_races}
+    still_running_candidates = {race : get_almost_candidates(graph_dict[race], race_params[race][1]) for race in unique_races}
 
-    successful_candidates
-
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("Successful Candidates")
+        successful_candidates
+    with col2:
+        st.subheader("Still Running Candidates")
+        still_running_candidates
 
     extra_details_race = st.selectbox("Race Details", unique_races)
-    print(extra_details_race)
 
 
     if extra_details_race is not None:
